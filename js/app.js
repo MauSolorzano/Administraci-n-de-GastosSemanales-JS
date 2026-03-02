@@ -3,6 +3,7 @@ const formulario = document.querySelector('#agregar-gasto');
 const gastoListado = document.querySelector('#gastos ul');
 let presupuesto;
 let exederPresupuesto = false;
+
 //Eventos 
 eventListeners();
 function eventListeners(){
@@ -34,9 +35,20 @@ class Presupuesto{
     obtenerRestante(){
         return this.restante;
     }
+
+    eliminarGasto(idGasto){
+       this.gastos = this.gastos.filter(gasto => gasto.id !==idGasto);
+       this.calcularRestante();
+    }
 }
 
 class UI{
+    limpiarHTML() {
+        while(gastoListado.firstChild) {
+            gastoListado.removeChild(gastoListado.firstChild);
+        }
+    }
+
     inserPresupuesto (cantidad){
         //Extrayendo valores con el destructor
         const {presupuesto, restante} = cantidad;
@@ -99,14 +111,16 @@ class UI{
 
         
     }
-    agregarGastoListado(gastos){
-        const nuevoGasto = document.createElement('li');
+    mostrarGastos(gastos){
+        this.limpiarHTML();
+
         gastos.forEach(gasto => {
 
             const {cantidad, nombre, id} = gasto;
 
             //Crear LI
-            
+                    const nuevoGasto = document.createElement('li');
+
             nuevoGasto.className= 'list-group-item d-flex justify-content-between aling-items-center';
 
             //Estos dos de abajo son lo mismo, la primer forma es mas vieja
@@ -120,8 +134,14 @@ class UI{
             //Boton para borrar el gasto 
             const btnBorrar = document.createElement('button');
             btnBorrar.classList.add('btn','btn-danger','borrar-gasto');
-            btnBorrar.innerHTML= 'Borrar &times'
+            btnBorrar.innerHTML= 'Borrar &times';
+            btnBorrar.onclick = ()=>{
+                //Con el ID recibo el id del gasto al cual se esta haciendo presion en ela vista 
+                eliminarGasto(id)
+            }   
             nuevoGasto.appendChild(btnBorrar);
+
+            
 
             //Agregar el html
             gastoListado.appendChild(nuevoGasto)
@@ -149,6 +169,7 @@ class UI{
         }
 
     }
+    
 }
 
 //Instaciar UI
@@ -196,8 +217,16 @@ function agregarGastos(e){
 
     ui.imprimirAlerta('Gasto agregado correctamente', 'correcto');
     //Imprimir los gastos  
-    ui.agregarGastoListado(gastos);
+    ui.mostrarGastos(gastos);
     ui.actualizarRestante(restante);
     ui.comprobarPresupuesto(presupuesto);
     formulario.reset();
+}
+
+function eliminarGasto(idGasto){
+    presupuesto.eliminarGasto(idGasto);
+    const {gastos, restante} = presupuesto;
+    ui.mostrarGastos(gastos);
+    ui.actualizarRestante(restante);
+    ui.comprobarPresupuesto(presupuesto);
 }
